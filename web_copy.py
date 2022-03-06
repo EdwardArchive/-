@@ -1,3 +1,6 @@
+## Selenium을 활용한 웹페이지 양식을 excel 에서 채워넣는 스크립트
+## 텍스트 copy 및 select 바 선택만을 사용하였습니다.
+
 from distutils.log import info
 from tkinter.tix import Tree
 from matplotlib.pyplot import getp
