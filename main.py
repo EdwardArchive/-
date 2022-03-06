@@ -1,3 +1,5 @@
+# excel 에서 한글누름틀로 정보를 옮겨주는 예제
+
 #pip install pandas
 #pip install xlrd
 #pip install pywin32
