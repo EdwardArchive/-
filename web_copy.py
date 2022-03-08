@@ -19,6 +19,7 @@ from getpass import getpass
 import tkinter as tk
 from tkinter import filedialog
 from tkinter import messagebox
+import openpyxl
 
 # 엑셀데이터 알람
 def alrt(name,infomiss,data=0):
@@ -72,14 +73,15 @@ def process(name,sheet_name):
 
 messagebox.showinfo("사용법", "엑셀을 선택하여 주세요!")
 file_path_ex = filedialog.askopenfilename(filetypes=[("Excel files", "*.xlsx")])
-sheet_name = str(input('sheet 이름은 무엇입니까? : '))
+wb = openpyxl.load_workbook(file_path_ex)
+ws = wb.active
+sheet_name = ws.title
 id = str(input('아이디를 입력하세요 : '))
 pwd = getpass('비밀번호를 입력하세요 : ')
 service_start = str(input('서비스 시작일자 : '))
 service_end = str(input('서비스 종료일자 : '))
 service_add = str(input('서비스 등록일자 : '))
 while True:
-    
     
     #1. 엑셀파일 열기
     df = pd.read_excel(r'{}'.format(file_path_ex), sheet_name=sheet_name,header=2)
@@ -101,10 +103,18 @@ while True:
     driver = webdriver.Chrome(executable_path='chromedriver',options=options)
     driver.get(url=URL)
 
+    tabs = driver.window_handles
+    print(tabs)
+
     #3. 로그인작업
     driver.find_element_by_xpath('//*[@id="txtLoginID"]').send_keys('{id}'.format(id=id))
     driver.find_element_by_xpath('//*[@id="txtPassword"]').send_keys('{pwd}'.format(pwd=pwd))
-    driver.find_element_by_xpath('//*[@id="btnLogin"]').click()
+    try:
+        driver.find_element_by_xpath('//*[@id="btnLogin"]').click()
+    except Exception as e:
+        driver.find_element_by_xpath('//*[@id="Notice"]/div/div[3]/span[2]/input').click()
+        driver.find_element_by_xpath('//*[@id="btnLogin"]').click()
+        
 
     #4. 고객 정보 입력 이동
     driver.get(url="https://cloud.sscrm.co.kr/Pages__C002/CS/CSCI_List.aspx")
