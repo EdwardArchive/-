@@ -1,6 +1,6 @@
 ## Selenium을 활용한 웹페이지 양식을 excel 에서 채워넣는 스크립트
 ## 텍스트 copy 및 select 바 선택만을 사용하였습니다.
-
+from time import sleep
 from distutils.log import info
 from tkinter.tix import Tree
 from matplotlib.pyplot import getp
@@ -75,16 +75,20 @@ messagebox.showinfo("사용법", "엑셀을 선택하여 주세요!")
 file_path_ex = filedialog.askopenfilename(filetypes=[("Excel files", "*.xlsx")])
 wb = openpyxl.load_workbook(file_path_ex)
 ws = wb.active
-sheet_name = ws.title
+sheet_name = str(ws.title)
 id = str(input('아이디를 입력하세요 : '))
 pwd = getpass('비밀번호를 입력하세요 : ')
 service_start = str(input('서비스 시작일자 : '))
 service_end = str(input('서비스 종료일자 : '))
 service_add = str(input('서비스 등록일자 : '))
+
 while True:
-    
     #1. 엑셀파일 열기
     df = pd.read_excel(r'{}'.format(file_path_ex), sheet_name=sheet_name,header=2)
+    if '장기' in sheet_name:
+        print("\n----장기고객입니다----")
+    elif '중기' in sheet_name:
+        print("\n----중기고객입니다----")
     print("\n----엑셀파일에 있는 이름들입니다----")
     print(df['성명'])
     print("----------------------------------\n")
@@ -122,7 +126,16 @@ while True:
 
     #5. 고객 정보 입력 
     get_info_dict = process(name,sheet_name)
-    if get_info_dict is not empty: 
+    if get_info_dict is not empty:
+        driver.find_element_by_xpath("//*[@id='divRight']/div/table[2]/tbody/tr[1]/td[2]/img[1]").click()
+        driver.switch_to.window(driver.window_handles[1])
+        driver.find_element_by_xpath('/html/body/form/div[3]/table/tbody/tr/td/div/table[2]/tbody/tr/td[2]/input').send_keys("전역장병")
+        driver.find_element_by_xpath('//*[@id="ContentPage_btnSearch"]').click()
+        if '장기' in sheet_name:
+            driver.find_element_by_xpath("//*[@id='ContentPage_gvList_btnClientNm_1']").click()
+        else :
+            driver.find_element_by_xpath("//*[@id='ContentPage_gvList_btnClientNm_0']").click()
+        driver.switch_to.window(driver.window_handles[0])
         driver.find_element_by_xpath("//select[@name='ctl00$ContentPage$FLD_CTCCODE']/option[text()='파주지사']").click() # CTC
         driver.find_element_by_xpath('//*[@id="ContentPage_FLD_CUSTNM"]').send_keys(get_info_dict['성명']) # 고객명
         driver.find_element_by_xpath('//*[@id="ContentPage_FLD_EMAIL"]').send_keys(get_info_dict['이메일']) # 이메일
@@ -132,6 +145,9 @@ while True:
         driver.find_element_by_xpath('//*[@id="ContentPage_FLD_WORKCOMPANYNAME"]').send_keys(get_info_dict['군'])
         driver.find_element_by_xpath("//select[@name='ctl00$ContentPage$FLD_CAREERGOALCODE']/option[text()='취업']").click()  # 경력목표
         driver.find_element_by_xpath("//select[@name='ctl00$ContentPage$FLD_PROCESSSTATUSCODE']/option[text()='진행중']").click() # 진행상황
+        driver.find_element_by_xpath('//*[@id="ContentPage_FLD_SERVICEBEGINDATE"]').clear() # 서비스 시작일자 초기화
+        driver.find_element_by_xpath('//*[@id="ContentPage_FLD_SERVICEENDDATE"]').clear() # 서비스 종료일자 초기화
+        driver.find_element_by_xpath('//*[@id="ContentPage_FLD_SERVICEREGDATE"]').clear() # 서비스 등록일자 초기화
         driver.find_element_by_xpath('//*[@id="ContentPage_FLD_SERVICEBEGINDATE"]').send_keys(service_start) # 서비스 시작일자
         driver.find_element_by_xpath('//*[@id="ContentPage_FLD_SERVICEENDDATE"]').send_keys(service_end) # 서비스 종료일자
         driver.find_element_by_xpath('//*[@id="ContentPage_FLD_SERVICEREGDATE"]').send_keys(service_add) # 서비스 등록일자
@@ -153,4 +169,4 @@ while True:
         driver.close()
 
     if input("종료하시겠습니까? (Y/N) : ") == 'Y':
-        break   
+        break 
